@@ -17,6 +17,10 @@ release: ## Release the project.
 build: ## Build the binary file.
 	$(GO_RELEASER) build --snapshot --clean
 
+.PHONY: mock
+mock: ## Generate mocks.
+	$(GO_RUN_TOOLS) github.com/vektra/mockery/v2
+
 .PHONY: generate
 generate: ## Generate code.
 	$(GO) generate ./...
