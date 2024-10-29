@@ -1,32 +1,20 @@
-# :partying_face: Template Go
+# 🗃️ Carry
 
-> This is a GitHub Template Repository. You can use the green button to create a new repository based on this template. Read more about [GitHub Template Repositories](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template).
+[![Test & Lint](https://github.com/zeiss/carry/actions/workflows/main.yml/badge.svg)](https://github.com/zeiss/carry/actions/workflows/main.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/zeiss/carry.svg)](https://pkg.go.dev/github.com/zeiss/carry)
+[![Go Report Card](https://goreportcard.com/badge/github.com/zeiss/carry)](https://goreportcard.com/report/github.com/zeiss/carry)
+[![Taylor Swift](https://img.shields.io/badge/secured%20by-taylor%20swift-brightgreen.svg)](https://twitter.com/SwiftOnSecurity)
+[![Volkswagen](https://auchenberg.github.io/volkswagen/volkswargen_ci.svg?v=1)](https://github.com/auchenberg/volkswagen)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-## Get Started
+`carry` is a Go HTTP client library that provides a simple and clean API for interacting with RESTful APIs. It had been specifically created to support HMAC authentication.
 
-This template supports `Makefile` to run tooling.
-
-> `make` is choosen as it is available on most systems.
-
-```bash
-# show `help`
-make help
-```
-
-Other available targets are
+## Installation
 
 ```bash
-build                          Build the binary file.
-clean                          Remove previous build.
-fmt                            Run go fmt against code.
-generate                       Generate code.
-help                           Display this help screen.
-lint                           Run lint.
-release                        Release the project.
-test                           Run tests.
-vet                            Run go vet against code.
+go get github.com/zeiss/carry
 ```
 
-The convention is to use `make` to run the build.
+## License
 
-Happy coding!
+[MIT](/LICENSE)

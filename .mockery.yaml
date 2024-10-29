@@ -1,0 +1,10 @@
+inpackage: True
+with-expecter: true
+dir: mocks
+packages:
+  github.com/zeiss/carry:
+    config:
+    interfaces:
+      Doer:
+        config:
+testonly: True
