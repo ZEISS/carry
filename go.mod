@@ -6,7 +6,7 @@ toolchain go1.23.2
 require (
 	github.com/google/go-querystring v1.1.0
 	github.com/stretchr/testify v1.10.0
-	github.com/zeiss/pkg v0.1.20
+	github.com/zeiss/pkg v0.1.21
 )
 
 require (
