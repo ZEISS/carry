@@ -31,7 +31,7 @@ type Client struct {
 	method          string
 	rawURL          string
 	header          http.Header
-	queryStructs    []interface{}
+	queryStructs    []any
 	bodyProvider    BodyProvider
 	responseDecoder ResponseDecoder
 	signer          SignerProvider
@@ -43,7 +43,7 @@ func New() *Client {
 		httpClient:      http.DefaultClient,
 		method:          "GET",
 		header:          make(http.Header),
-		queryStructs:    make([]interface{}, 0),
+		queryStructs:    make([]any, 0),
 		responseDecoder: jsonDecoder{},
 		signer:          noopSigner{},
 	}
@@ -63,7 +63,7 @@ func (s *Client) New() *Client {
 		method:          s.method,
 		rawURL:          s.rawURL,
 		header:          headerCopy,
-		queryStructs:    append([]interface{}{}, s.queryStructs...),
+		queryStructs:    append([]any{}, s.queryStructs...),
 		bodyProvider:    s.bodyProvider,
 		responseDecoder: s.responseDecoder,
 		signer:          s.signer,
@@ -171,7 +171,7 @@ func (s *Client) SignProvider(signer SignerProvider) *Client {
 	return s
 }
 
-// SetBasicAuth sets the Authorization header to use HTTP Basic Authentication
+// SetBasicAuth sets the Authorization header to use HTTP Basic Authentication.
 func (s *Client) SetBasicAuth(username, password string) *Client {
 	return s.Set("Authorization", "Basic "+basicAuth(username, password))
 }
@@ -181,7 +181,7 @@ func basicAuth(username, password string) string {
 	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
-// Base sets the rawURL of the Client. The rawURL is resolved to an absolute
+// Base sets the rawURL of the Client. The rawURL is resolved to an absolute.
 func (s *Client) Base(rawURL string) *Client {
 	s.rawURL = rawURL
 	return s
@@ -200,8 +200,9 @@ func (s *Client) Path(path string) *Client {
 	return s
 }
 
-// QueryStruct appends the queryStruct to the Client's queryStructs. The
-func (s *Client) QueryStruct(queryStruct interface{}) *Client {
+// QueryStruct appends the queryStruct to the Client's queryStructs.
+// The queryStruct is converted to a URL query string and appended to the rawURL.
+func (s *Client) QueryStruct(queryStruct any) *Client {
 	if utilx.NotEmpty(queryStruct) {
 		s.queryStructs = append(s.queryStructs, queryStruct)
 	}
@@ -234,8 +235,8 @@ func (s *Client) BodyProvider(body BodyProvider) *Client {
 	return s
 }
 
-// BodyJSON sets the Client's bodyJSON. The value pointed to by the bodyJSON
-func (s *Client) BodyJSON(bodyJSON interface{}) *Client {
+// BodyJSON sets the Client's bodyJSON. The value pointed to by the bodyJSON is marshaled to JSON and used as the request body.
+func (s *Client) BodyJSON(bodyJSON any) *Client {
 	if utilx.Empty(bodyJSON) {
 		return s
 	}
@@ -243,8 +244,8 @@ func (s *Client) BodyJSON(bodyJSON interface{}) *Client {
 	return s.BodyProvider(jsonBodyProvider{payload: bodyJSON})
 }
 
-// BodyForm sets the Client's bodyForm. The value pointed to by the bodyForm
-func (s *Client) BodyForm(bodyForm interface{}) *Client {
+// BodyForm sets the Client's bodyForm. The value pointed to by the bodyForm.
+func (s *Client) BodyForm(bodyForm any) *Client {
 	if utilx.Empty(bodyForm) {
 		return s
 	}
@@ -288,7 +289,7 @@ func (s *Client) Request(ctx context.Context) (*http.Request, error) {
 	return req, err
 }
 
-func addQueryStructs(reqURL *url.URL, queryStructs []interface{}) error {
+func addQueryStructs(reqURL *url.URL, queryStructs []any) error {
 	urlValues, err := url.ParseQuery(reqURL.RawQuery)
 	if err != nil {
 		return err
@@ -331,13 +332,13 @@ func (s *Client) ResponseDecoder(decoder ResponseDecoder) *Client {
 	return s
 }
 
-// ReceiveSuccess creates a new HTTP request and returns the response. Success
-func (s *Client) ReceiveSuccess(ctx context.Context, successV interface{}) (*http.Response, error) {
+// ReceiveSuccess creates a new HTTP request and returns the response. Success responses.
+func (s *Client) ReceiveSuccess(ctx context.Context, successV any) (*http.Response, error) {
 	return s.Receive(ctx, successV, nil)
 }
 
-// Receive creates a new HTTP request and returns the response. Success responses
-func (s *Client) Receive(ctx context.Context, successV, failureV interface{}) (*http.Response, error) {
+// Receive creates a new HTTP request and returns the response. Success responses.
+func (s *Client) Receive(ctx context.Context, successV, failureV any) (*http.Response, error) {
 	req, err := s.Request(ctx)
 	if err != nil {
 		return nil, err
@@ -345,14 +346,14 @@ func (s *Client) Receive(ctx context.Context, successV, failureV interface{}) (*
 	return s.Do(req, successV, failureV)
 }
 
-// Do sends an HTTP request and returns an HTTP response, following policy
-func (s *Client) Do(req *http.Request, successV, failureV interface{}) (*http.Response, error) {
+// Do sends an HTTP request and returns an HTTP response, following policy.
+func (s *Client) Do(req *http.Request, successV, failureV any) (*http.Response, error) {
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		return resp, err
 	}
 	defer resp.Body.Close()
-	defer io.Copy(io.Discard, resp.Body)
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNoContent || resp.ContentLength == 0 {
 		return resp, nil
@@ -364,7 +365,7 @@ func (s *Client) Do(req *http.Request, successV, failureV interface{}) (*http.Re
 	return resp, err
 }
 
-func decodeResponse(resp *http.Response, decoder ResponseDecoder, successV, failureV interface{}) error {
+func decodeResponse(resp *http.Response, decoder ResponseDecoder, successV, failureV any) error {
 	if code := resp.StatusCode; 200 <= code && code <= 299 {
 		if successV != nil {
 			return decoder.Decode(resp, successV)
